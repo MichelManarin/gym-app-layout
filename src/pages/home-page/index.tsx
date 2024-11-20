@@ -31,7 +31,7 @@ export default function HomePage({ navigation }: { navigation: any }) {
 
   const renderHeader = () => (
     <View style={[styles.statsContainer, { margin: 5 }]}>
-        <Text style={styles.title}>Calorias</Text>
+      <Text style={styles.title}>Calorias</Text>
       <View style={styles.filterContainer}>
         {periods.map((item) => (
           <TouchableOpacity
@@ -104,7 +104,7 @@ export default function HomePage({ navigation }: { navigation: any }) {
         )}
         contentContainerStyle={styles.container}
       />
-      <BottomNav />
+      <BottomNav navigation={navigation} />
     </View>
   );
 }

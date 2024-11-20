@@ -4,13 +4,12 @@ import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-nati
 const CustomButtonGroup = ({ laterText = "‹‹  Pular", doItText = "Começar ›››", onPressContinue = () => { }, onPressBack = () => { } }) => {
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.laterButton}>
+      <TouchableOpacity style={styles.laterButton} onPress={() => onPressBack()}>
         <Text
-          onPress={() => onPressBack()}
           style={styles.laterText}>{laterText}</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.doItButton}>
-        <Text onPress={() => onPressContinue()} style={styles.doItText}>{doItText}</Text>
+      <TouchableOpacity style={styles.doItButton} onPress={() => onPressContinue()}>
+        <Text style={styles.doItText}>{doItText}</Text>
       </TouchableOpacity>
     </View>
   );

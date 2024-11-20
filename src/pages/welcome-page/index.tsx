@@ -1,27 +1,48 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions, Image } from 'react-native';
+import * as SplashScreen from 'expo-splash-screen';
 import CustomButtonGroup from '../../components/footer-bottom-group';
 import { useFonts, Poppins_700Bold } from '@expo-google-fonts/poppins';
-import AppLoading from 'expo-app-loading';
-import Illustration from '../../assets/gym.png'; 
+import Illustration from '../../assets/gym.png';
 
-const { height } = Dimensions.get('window'); 
+const { height } = Dimensions.get('window');
+
+SplashScreen.preventAutoHideAsync();
 
 const WelcomePage = ({ navigation }: { navigation: any }) => {
   const [fontsLoaded] = useFonts({
     Poppins_700Bold,
   });
 
-  if (!fontsLoaded) {
-    return <AppLoading />;
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    async function prepare() {
+      try {
+        if (fontsLoaded) {
+          setIsReady(true);
+        }
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        if (fontsLoaded) {
+          SplashScreen.hideAsync(); 
+        }
+      }
+    }
+
+    prepare();
+  }, [fontsLoaded]);
+
+  if (!isReady) {
+    return null; 
   }
 
   const onPressContinue = () => {
     navigation.navigate('Goals');
-  }
+  };
 
-  const onPressBack = () => {
-  }
+  const onPressBack = () => {};
 
   return (
     <View style={styles.container}>
@@ -76,13 +97,13 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     marginTop: 40,
-    height: height * 0.3, 
+    height: height * 0.3,
     marginBottom: 30,
   },
   description: {
     fontSize: 14,
-    textAlign: "center",
-    color: "#777",
+    textAlign: 'center',
+    color: '#777',
     marginBottom: 30,
   },
   footer: {

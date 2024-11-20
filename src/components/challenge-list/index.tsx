@@ -12,7 +12,7 @@ interface Challenge {
 
 const challenges: Challenge[] = [
   { id: "1", title: "Caminhada Semanal 🔥", steps: "10000 Passos" },
-  { id: "2", title: "Corrida de Quarta 🏃‍♂️", steps: "Completar 5km" },
+  { id: "2", title: "Corrida de Quarta 🏃‍♂️", steps: "Completar 5 km" },
   { id: "3", title: "Meditação Diária 🧘", steps: "10 mins" },
   { id: "4", title: "Musc. Semanal 💪", steps: "2 horas" },
   { id: "9999", title: "Adicionar", steps: "-" },
