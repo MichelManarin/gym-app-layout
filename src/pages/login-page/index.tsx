@@ -23,7 +23,6 @@ export default function LoginPage({ navigation }: { navigation: any }) {
     try {
       const response = await api.post("auth/login", values);
 
-      console.log("response ", response.data); 
       const { token } = response.data || {};
 
       await saveInformationOnLocalCache("auth_token", token);
@@ -34,7 +33,6 @@ export default function LoginPage({ navigation }: { navigation: any }) {
     } catch (error: any) {
 
       setIsAuthenticated(false); 
-      console.log("errro.respponse ", error)
       if (error.response) {
         setIsAuthenticated(false); 
         const { message, errors } = error.response.data;

@@ -1,6 +1,6 @@
 import api from '../../services/api';
 import { saveInformationOnLocalCache, removeInformationFromLocalCache } from "../../services/storage";
-import LoginResponse from "../../services/dto/login-response";
+import LoginResponse from "../dto/response/login";
 
 export const validateTokenRequest = async (token : string): Promise<LoginResponse> => {
   try {

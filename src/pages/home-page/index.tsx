@@ -1,33 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { View, Text, StyleSheet, Dimensions, FlatList, TouchableOpacity } from "react-native";
 import BottomNav from '../../components/bottom-navigation';
 import TopHeader from '../../components/user-information';
 import ChallengeList from '../../components/challenge-list';
+import { getMetric } from '../../services/requests/metricService';
+import { AppContext } from "../../contexts/AppContext";
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 import {
   ProgressChart
 } from "react-native-chart-kit";
 
-const stats = [
-  { id: "1", title: "Passos", value: "2546" },
-  { id: "2", title: "Dormir", value: "8h 46m" },
-  { id: "3", title: "Treino", value: "1h 27 mins" },
-  { id: "4", title: "Meditação", value: "0 mins" },
-];
-
 const periods = ["Hoje", "Semana", "Mês", "Ano"];
 
 export default function HomePage({ navigation }: { navigation: any }) {
-
+  const { metric, setMetric } = useContext(AppContext);
   const [period, setPeriod] = useState("Hoje");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getMetric(period);
+        setMetric(data);
+      } catch (error) {
+        console.error("Erro ao buscar métricas:", error);
+      }
+    };
+
+    fetchData();
+  }, [period, navigation]);
 
   const renderFooter = () => (
     <View style={{ paddingBottom: 70 }}>
       <ChallengeList />
     </View>
-  )
+  );
 
   const renderHeader = () => (
     <View style={[styles.statsContainer, { margin: 5 }]}>
@@ -49,7 +57,10 @@ export default function HomePage({ navigation }: { navigation: any }) {
         <View style={[{ alignItems: "center", justifyContent: "center", width: width - 40 }]}>
           <ProgressChart
             data={{
-              data: [0.7, 0.5],
+              data: [
+                metric ? metric.calories.consumed / 2000 : 0,
+                metric ? metric.calories.burned / 2000 : 0,
+              ],
             }}
             width={width - 40}
             height={150}
@@ -69,18 +80,17 @@ export default function HomePage({ navigation }: { navigation: any }) {
               <View style={[styles.colorDot, { backgroundColor: "#7F58FF" }]} />
               <View>
                 <Text style={styles.labelText}>Consumidas</Text>
-                <Text style={styles.labelSubText}>Total: 1500 kcal</Text>
+                <Text style={styles.labelSubText}>Total: {metric?.calories?.consumed || 0} kcal</Text>
               </View>
             </View>
             <View style={styles.labelItem}>
               <View style={[styles.colorDot, { backgroundColor: "rgba(127, 88, 255, 0.6)" }]} />
               <View>
                 <Text style={styles.labelText}>Queimadas</Text>
-                <Text style={styles.labelSubText}>Total: 1200 kcal</Text>
+                <Text style={styles.labelSubText}>Total: {metric?.calories?.burned || 0} kcal</Text>
               </View>
             </View>
           </View>
-
         </View>
       </View>
     </View>
@@ -90,14 +100,19 @@ export default function HomePage({ navigation }: { navigation: any }) {
     <View style={{ flex: 1, backgroundColor: "#f7f8fc" }}>
       <TopHeader></TopHeader>
       <FlatList
-        data={stats}
+        data={[
+          { id: "1", title: "Passos", value: metric?.steps || "0" },
+          { id: "2", title: "Dormir", value: metric?.sleep || "0h 0m" },
+          { id: "3", title: "Treino", value: metric?.workout || "0h 0m" },
+          { id: "4", title: "Meditação", value: metric?.meditation || "0 mins" },
+        ]}
         style={styles.m0}
         keyExtractor={(item) => item.id}
         numColumns={2}
         ListHeaderComponent={renderHeader}
         ListFooterComponent={renderFooter}
         renderItem={({ item }) => (
-          <View style={styles.statBox} >
+          <View style={styles.statBox}>
             <Text style={styles.statTitle}>{item.title}</Text>
             <Text style={styles.statValue}>{item.value}</Text>
           </View>
@@ -150,7 +165,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
     alignItems: "center",
-    marginTop: 10
+    marginTop: 10,
   },
   statTitle: {
     fontSize: 14,
@@ -190,7 +205,7 @@ const styles = StyleSheet.create({
     elevation: 2,
     backgroundColor: "#fff",
     borderRadius: 10,
-    padding: 10
+    padding: 10,
   },
   filterContainer: {
     flexDirection: "row",
