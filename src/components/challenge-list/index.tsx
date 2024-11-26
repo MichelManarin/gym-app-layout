@@ -1,24 +1,13 @@
-import React from "react";
+import React, { useContext } from "react";
 import { View, StyleSheet, FlatList, Text } from "react-native";
+import { AppContext } from "../../contexts/AppContext";
+
 import ChallengeCard from "../challenge-card"; 
 import CreateChallengeCard from "../challenge-card-add"; 
 
-
-interface Challenge {
-  id: string;
-  title: string;
-  steps: string;
-}
-
-const challenges: Challenge[] = [
-  { id: "1", title: "Caminhada Semanal 🔥", steps: "10000 Passos" },
-  { id: "2", title: "Corrida de Quarta 🏃‍♂️", steps: "Completar 5 km" },
-  { id: "3", title: "Meditação Diária 🧘", steps: "10 mins" },
-  { id: "4", title: "Musc. Semanal 💪", steps: "2 horas" },
-  { id: "9999", title: "Adicionar", steps: "-" },
-];
-
 export default function ChallengeList() {
+  const { challenges } = useContext(AppContext);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Desafios</Text>

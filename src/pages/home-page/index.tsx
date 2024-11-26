@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useContext } from "react";
-import { View, Text, StyleSheet, Dimensions, FlatList, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Dimensions, FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
 import BottomNav from '../../components/bottom-navigation';
 import TopHeader from '../../components/user-information';
 import ChallengeList from '../../components/challenge-list';
 import { getMetric } from '../../services/requests/metricService';
+import { list } from '../../services/requests/challengeService';
 import { AppContext } from "../../contexts/AppContext";
 
 const { width } = Dimensions.get("window");
@@ -15,25 +16,43 @@ import {
 const periods = ["Hoje", "Semana", "Mês", "Ano"];
 
 export default function HomePage({ navigation }: { navigation: any }) {
-  const { metric, setMetric } = useContext(AppContext);
+  const { metric, setMetric, setChallenges } = useContext(AppContext);
+  const [loadingMetric, setLoadingMetric] = useState(false);
+  const [loadingChallenge, setLoadingChallenge] = useState(false);
   const [period, setPeriod] = useState("Hoje");
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDataMetric = async () => {
       try {
+        setLoadingMetric(true);
         const data = await getMetric(period);
         setMetric(data);
+        setLoadingMetric(false);
       } catch (error) {
+        setLoadingMetric(false);
         console.error("Erro ao buscar métricas:", error);
       }
     };
 
-    fetchData();
+    const fetchDataChallenges = async () => {
+      try {
+        setLoadingChallenge(true);
+        const data = await list();
+        setChallenges(data);
+        setLoadingChallenge(false);
+      } catch (error) {
+        setLoadingChallenge(false);
+        console.error("Erro ao buscar os desafios:", error);
+      }
+    };
+
+    fetchDataMetric();
+    fetchDataChallenges();
   }, [period, navigation]);
 
   const renderFooter = () => (
     <View style={{ paddingBottom: 70 }}>
-      <ChallengeList />
+      {loadingChallenge ? (<></>) : (<ChallengeList />)}
     </View>
   );
 
@@ -53,46 +72,53 @@ export default function HomePage({ navigation }: { navigation: any }) {
           </TouchableOpacity>
         ))}
       </View>
-      <View style={styles.shadowBox}>
-        <View style={[{ alignItems: "center", justifyContent: "center", width: width - 40 }]}>
-          <ProgressChart
-            data={{
-              data: [
-                metric ? metric.calories.consumed / 2000 : 0,
-                metric ? metric.calories.burned / 2000 : 0,
-              ],
-            }}
-            width={width - 40}
-            height={150}
-            strokeWidth={16}
-            radius={32}
-            chartConfig={{
-              backgroundGradientFrom: "#fff",
-              backgroundGradientTo: "#fff",
-              decimalPlaces: 2,
-              color: (opacity = 1) => `rgba(127, 88, 255, ${opacity})`,
-              labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-            }}
-            hideLegend={true}
-          />
-          <View style={styles.labelsContainer}>
-            <View style={styles.labelItem}>
-              <View style={[styles.colorDot, { backgroundColor: "#7F58FF" }]} />
-              <View>
-                <Text style={styles.labelText}>Consumidas</Text>
-                <Text style={styles.labelSubText}>Total: {metric?.calories?.consumed || 0} kcal</Text>
+      {loadingMetric ? (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color="#7F58FF" />
+          <Text style={styles.loadingText}>Carregando métricas...</Text>
+        </View>
+      ) : (
+        <View style={styles.shadowBox}>
+          <View style={[{ alignItems: "center", justifyContent: "center", width: width - 40 }]}>
+            <ProgressChart
+              data={{
+                data: [
+                  metric ? metric.calories.consumed / 2000 : 0,
+                  metric ? metric.calories.burned / 2000 : 0,
+                ],
+              }}
+              width={width - 40}
+              height={150}
+              strokeWidth={16}
+              radius={32}
+              chartConfig={{
+                backgroundGradientFrom: "#fff",
+                backgroundGradientTo: "#fff",
+                decimalPlaces: 2,
+                color: (opacity = 1) => `rgba(127, 88, 255, ${opacity})`,
+                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+              }}
+              hideLegend={true}
+            />
+            <View style={styles.labelsContainer}>
+              <View style={styles.labelItem}>
+                <View style={[styles.colorDot, { backgroundColor: "#7F58FF" }]} />
+                <View>
+                  <Text style={styles.labelText}>Consumidas</Text>
+                  <Text style={styles.labelSubText}>Total: {metric?.calories?.consumed || 0} kcal</Text>
+                </View>
               </View>
-            </View>
-            <View style={styles.labelItem}>
-              <View style={[styles.colorDot, { backgroundColor: "rgba(127, 88, 255, 0.6)" }]} />
-              <View>
-                <Text style={styles.labelText}>Queimadas</Text>
-                <Text style={styles.labelSubText}>Total: {metric?.calories?.burned || 0} kcal</Text>
+              <View style={styles.labelItem}>
+                <View style={[styles.colorDot, { backgroundColor: "rgba(127, 88, 255, 0.6)" }]} />
+                <View>
+                  <Text style={styles.labelText}>Queimadas</Text>
+                  <Text style={styles.labelSubText}>Total: {metric?.calories?.burned || 0} kcal</Text>
+                </View>
               </View>
             </View>
           </View>
         </View>
-      </View>
+      )}
     </View>
   );
 
@@ -112,10 +138,12 @@ export default function HomePage({ navigation }: { navigation: any }) {
         ListHeaderComponent={renderHeader}
         ListFooterComponent={renderFooter}
         renderItem={({ item }) => (
-          <View style={styles.statBox}>
-            <Text style={styles.statTitle}>{item.title}</Text>
-            <Text style={styles.statValue}>{item.value}</Text>
-          </View>
+          <>
+            {loadingMetric ? <></> : <><View style={styles.statBox}>
+              <Text style={styles.statTitle}>{item.title}</Text>
+              <Text style={styles.statValue}>{item.value}</Text>
+            </View></>}
+          </>
         )}
         contentContainerStyle={styles.container}
       />
@@ -135,6 +163,16 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     color: '#3B3B3B',
     fontFamily: 'Poppins_700Bold',
+  },
+  loaderContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginVertical: 20,
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 14,
+    color: "#555",
   },
   statsContainer: {
     marginTop: 5,
