@@ -10,7 +10,7 @@ export default function TopHeader() {
       <View style={styles.headerContent}>
         <View>
           <Text style={styles.greetingText}>Olá Michel 👋</Text>
-          <Text style={styles.scheduleText}>Verifique suas pendencias</Text>
+          <Text style={styles.scheduleText}>Verifique suas pendências</Text>
         </View>
         <View style={styles.avatarContainer}>
           <Image 
@@ -26,7 +26,7 @@ export default function TopHeader() {
 const styles = StyleSheet.create({
   headerContainer: {
     width: width,
-    height: 140, 
+    height: 125, 
     backgroundColor: "#7F58FF", 
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
   scheduleText: {
     fontSize: 16,
     color: "#EEE",
-    marginTop: 5,
+    marginTop: 0,
   },
   avatarContainer: {
     width: 55,
